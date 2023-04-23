@@ -33,8 +33,8 @@ class UserControllerTest {
 
     @BeforeEach
     void createUserAndParseInJson() throws JsonProcessingException {
-        userIn = new User(null, "asd@mail.ru", "a","s"
-                , LocalDate.of(1900, Month.DECEMBER,8));
+        userIn = new User(null, "asd@mail.ru", "a", "s",
+                LocalDate.of(1900, Month.DECEMBER, 8));
         jsonUser = mapper.writeValueAsString(userIn);
     }
 
@@ -54,10 +54,11 @@ class UserControllerTest {
     @Test
     void shouldReturnListOfUsersWithStatus200WhenCallMethodGet() throws Exception {
         mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON).content(jsonUser)).andExpect(status().isOk());
+                .accept(MediaType.APPLICATION_JSON).content(jsonUser)).andExpect(status().isOk());
         MvcResult result = mockMvc.perform(get("/users")).andExpect(status().isOk()).andReturn();
         List<User> users = mapper.readValue(result.getResponse().getContentAsString()
-                , new TypeReference<List<User>>(){});
+                , new TypeReference<List<User>>() {
+                });
         User userOut = users.get(0);
         assertEquals(userIn, userOut);
     }
@@ -66,8 +67,8 @@ class UserControllerTest {
     void shouldUpdateUserAndReturnStatus200WhenCallMethodPut() throws Exception {
         mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON).content(jsonUser)).andExpect(status().isOk());
-        User updatedUser = new User(1, "mail@mail.ru", "Login", "Name"
-                , LocalDate.of(1999, 2, 2));
+        User updatedUser = new User(1, "mail@mail.ru", "Login", "Name",
+                LocalDate.of(1999, 2, 2));
         String updatedUserInJson = mapper.writeValueAsString(updatedUser);
         MvcResult result = mockMvc.perform(put("/users").contentType(MediaType.APPLICATION_JSON)
                         .content(updatedUserInJson))
@@ -78,8 +79,8 @@ class UserControllerTest {
 
     @Test
     void shouldReturnStatus400WhenCallMethodPostAndUserDontHasEmail() throws Exception {
-        User incorrectUser = new User(null, null, "a","s"
-                , LocalDate.of(1900, Month.DECEMBER,8));
+        User incorrectUser = new User(null, null, "a", "s",
+                LocalDate.of(1900, Month.DECEMBER, 8));
         String json = mapper.writeValueAsString(incorrectUser);
         mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isBadRequest());
@@ -87,8 +88,8 @@ class UserControllerTest {
 
     @Test
     void shouldReturnStatus400WhenCallMethodPostAndUserDontHasLogin() throws Exception {
-        User incorrectUser = new User(null, "mail@mail.ru", null,"s"
-                , LocalDate.of(1900, Month.DECEMBER,8));
+        User incorrectUser = new User(null, "mail@mail.ru", null, "s",
+                LocalDate.of(1900, Month.DECEMBER, 8));
         String json = mapper.writeValueAsString(incorrectUser);
         mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isBadRequest());
@@ -96,8 +97,8 @@ class UserControllerTest {
 
     @Test
     void shouldReturnStatus400WhenCallMethodPostAndUserHasIncorrectEmail() throws Exception {
-        User incorrectUser = new User(null, "asasasas", "a","s"
-                , LocalDate.of(1900, Month.DECEMBER,8));
+        User incorrectUser = new User(null, "asasasas", "a", "s",
+                LocalDate.of(1900, Month.DECEMBER, 8));
         String json = mapper.writeValueAsString(incorrectUser);
         mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isBadRequest());
@@ -105,8 +106,8 @@ class UserControllerTest {
 
     @Test
     void shouldReturnStatus400WhenCallMethodPostAndUserHasBlankLogin() throws Exception {
-        User incorrectUser = new User(null, "mail@mail.ru", "","s"
-                , LocalDate.of(1900, Month.DECEMBER,8));
+        User incorrectUser = new User(null, "mail@mail.ru", "", "s",
+                LocalDate.of(1900, Month.DECEMBER, 8));
         String json = mapper.writeValueAsString(incorrectUser);
         mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isBadRequest());
@@ -114,8 +115,8 @@ class UserControllerTest {
 
     @Test
     void shouldReturnStatus400WhenCallMethodPostAndUserHasSpaceInLogin() throws Exception {
-        User incorrectUser = new User(null, "mail@mail.ru", "sd ds","s"
-                , LocalDate.of(1900, Month.DECEMBER,8));
+        User incorrectUser = new User(null, "mail@mail.ru", "sd ds", "s",
+                LocalDate.of(1900, Month.DECEMBER, 8));
         String json = mapper.writeValueAsString(incorrectUser);
         mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isBadRequest());
@@ -123,8 +124,8 @@ class UserControllerTest {
 
     @Test
     void shouldReturnStatus400WhenCallMethodPostAndUserHasBirthdayInFuture() throws Exception {
-        User incorrectUser = new User(null, "mail@mail.ru", "Login","s"
-                , LocalDate.of(2200, Month.DECEMBER,8));
+        User incorrectUser = new User(null, "mail@mail.ru", "Login", "s",
+                LocalDate.of(2200, Month.DECEMBER, 8));
         String json = mapper.writeValueAsString(incorrectUser);
         mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isBadRequest());
@@ -132,8 +133,7 @@ class UserControllerTest {
 
     @Test
     void shouldReturnStatus400WhenCallMethodPostAndUserHasBirthdayEqualsNull() throws Exception {
-        User incorrectUser = new User(null, "mail@mail.ru", "nullo","s"
-                , null);
+        User incorrectUser = new User(null, "mail@mail.ru", "nullo", "s", null);
         String json = mapper.writeValueAsString(incorrectUser);
         mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isBadRequest());

@@ -10,6 +10,8 @@ import java.lang.annotation.*;
 @Documented
 public @interface ReleaseDate {
     String message() default "{ReleaseDate.message}";
+
     Class<?>[] groups() default {};
+
     Class<? extends Payload>[] payload() default {};
 }
