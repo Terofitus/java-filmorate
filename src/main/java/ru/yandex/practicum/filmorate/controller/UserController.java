@@ -49,4 +49,11 @@ public class UserController {
         log.info("Обновлен user с id {}", user.getId());
         return user;
     }
+
+    @DeleteMapping
+    public void deleteAllUsers() {
+        users.clear();
+        generatedId = 1;
+        log.info("Все пользователи удалены");
+    }
 }

@@ -5,6 +5,7 @@ import lombok.EqualsAndHashCode;
 import org.springframework.format.annotation.DateTimeFormat;
 import ru.yandex.practicum.filmorate.controller.ReleaseDate;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
@@ -15,8 +16,10 @@ public class Film {
     @EqualsAndHashCode.Exclude
     private Integer id;
     @NotEmpty
+    @NotBlank
     private String name;
     @NotEmpty
+    @NotBlank
     @Size(max = 200)
     private String description;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -24,4 +27,15 @@ public class Film {
     private LocalDate releaseDate;
     @Positive
     private Integer duration;
+
+    public Film(Integer id, String name, String description, LocalDate releaseDate, Integer duration) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+    }
+
+    public Film() {
+    }
 }

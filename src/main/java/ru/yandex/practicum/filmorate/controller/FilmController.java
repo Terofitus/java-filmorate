@@ -24,12 +24,12 @@ public class FilmController {
     @PostMapping
     public Film createFilm(@RequestBody @Valid Film film) {
         if(films.containsValue(film)) {
-            log.error("Фильм {} {} года уже добавлен", film.getName(), film.getReleaseDate());
+            log.error("Фильм {} {} года уже добавлен", film.getName(), film.getReleaseDate().getYear());
             throw new ValidationException("Данный фильм уже добавлен");
         }
         film.setId(generatedId++);
         films.put(film.getId(), film);
-        log.info("Добавлен фильм {} {} года", film.getName(), film.getReleaseDate());
+        log.info("Добавлен фильм {} {} года", film.getName(), film.getReleaseDate().getYear());
         return film;
     }
 
@@ -42,5 +42,12 @@ public class FilmController {
         films.put(film.getId(), film);
         log.info("Фильм с id {} был обновлен", film.getId());
         return film;
+    }
+
+    @DeleteMapping
+    public void deleteAllFilms() {
+        films.clear();
+        generatedId = 1;
+        log.info("Все фильмы удалены");
     }
 }
