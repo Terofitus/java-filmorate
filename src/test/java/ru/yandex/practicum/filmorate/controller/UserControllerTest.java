@@ -56,8 +56,8 @@ class UserControllerTest {
         mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON).content(jsonUser)).andExpect(status().isOk());
         MvcResult result = mockMvc.perform(get("/users")).andExpect(status().isOk()).andReturn();
-        List<User> users = mapper.readValue(result.getResponse().getContentAsString()
-                , new TypeReference<List<User>>() {
+        List<User> users = mapper.readValue(result.getResponse().getContentAsString(),
+                new TypeReference<List<User>>() {
                 });
         User userOut = users.get(0);
         assertEquals(userIn, userOut);
