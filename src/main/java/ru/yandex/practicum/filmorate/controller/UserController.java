@@ -24,24 +24,24 @@ public class UserController {
 
     @PostMapping
     public User createUser(@RequestBody @Valid User user) {
-        if(users.values().stream().anyMatch(u -> u.getEmail().equals(user.getEmail()))) {
+        if (users.values().stream().anyMatch(u -> u.getEmail().equals(user.getEmail()))) {
             log.error("Попытка создать user с email {}, который уже зарегистрирован", user.getEmail());
             throw new ValidationException("User с таким email уже зарегистрирован");
-        } else if(users.values().stream().anyMatch(u -> u.getLogin().equals(user.getLogin()))) {
+        } else if (users.values().stream().anyMatch(u -> u.getLogin().equals(user.getLogin()))) {
             log.error("Попытка создать user с логином {}, который уже зарегистрирован", user.getLogin());
             throw new ValidationException("Данный логин занят");
         }
         user.setId(generatedId++);
-        if(user.getName() == null) user.setName(user.getLogin());
+        if (user.getName() == null) user.setName(user.getLogin());
         users.put(user.getId(), user);
-        log.info("Зарегистрирован user с email {}, под логином {}, id={}", user.getEmail(), user.getLogin()
-                , user.getId());
+        log.info("Зарегистрирован user с email {}, под логином {}, id={}", user.getEmail(), user.getLogin(),
+                user.getId());
         return user;
     }
 
     @PutMapping
     public User updateUser(@RequestBody @Valid User user) {
-        if(!users.containsKey(user.getId())) {
+        if (!users.containsKey(user.getId())) {
             log.error("Попытка обновить user, который не зарегистрирован");
             throw new ValidationException("Данный user не зарегистрирован");
         }
