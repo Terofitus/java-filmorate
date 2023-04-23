@@ -16,6 +16,7 @@ import java.util.List;
 public class FilmController {
     private final HashMap<Integer,Film> films = new HashMap<>();
     private Integer generatedId = 1;
+    
     @GetMapping
     public List<Film> getFilms() {
         return new ArrayList<>(films.values());
@@ -23,7 +24,7 @@ public class FilmController {
 
     @PostMapping
     public Film createFilm(@RequestBody @Valid Film film) {
-        if(films.containsValue(film)) {
+        if (films.containsValue(film)) {
             log.error("Фильм {} {} года уже добавлен", film.getName(), film.getReleaseDate().getYear());
             throw new ValidationException("Данный фильм уже добавлен");
         }
@@ -35,7 +36,7 @@ public class FilmController {
 
     @PutMapping
     public Film updateFilm(@RequestBody @Valid Film film) {
-        if(!films.containsKey(film.getId())) {
+        if (!films.containsKey(film.getId())) {
             log.error("Фильм {} не может быть обновлен, так как не был добавлен", film.getName());
             throw new ValidationException("Фильм не может быть обновлен, так как не был добавлен");
         }
