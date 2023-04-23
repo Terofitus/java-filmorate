@@ -1,10 +1,15 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,11 +32,12 @@ public class FilmController {
         if (films.containsValue(film)) {
             log.error("Фильм {} {} года уже добавлен", film.getName(), film.getReleaseDate().getYear());
             throw new ValidationException("Данный фильм уже добавлен");
+        } else {
+            film.setId(generatedId++);
+            films.put(film.getId(), film);
+            log.info("Добавлен фильм {} {} года", film.getName(), film.getReleaseDate().getYear());
+            return film;
         }
-        film.setId(generatedId++);
-        films.put(film.getId(), film);
-        log.info("Добавлен фильм {} {} года", film.getName(), film.getReleaseDate().getYear());
-        return film;
     }
 
     @PutMapping
@@ -39,10 +45,11 @@ public class FilmController {
         if (!films.containsKey(film.getId())) {
             log.error("Фильм {} не может быть обновлен, так как не был добавлен", film.getName());
             throw new ValidationException("Фильм не может быть обновлен, так как не был добавлен");
+        } else {
+            films.put(film.getId(), film);
+            log.info("Фильм с id {} был обновлен", film.getId());
+            return film;
         }
-        films.put(film.getId(), film);
-        log.info("Фильм с id {} был обновлен", film.getId());
-        return film;
     }
 
     @DeleteMapping
