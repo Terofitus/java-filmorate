@@ -14,9 +14,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/films")
 public class FilmController {
-    private final HashMap<Integer,Film> films = new HashMap<>();
+    private final HashMap<Integer, Film> films = new HashMap<>();
     private Integer generatedId = 1;
-    
+
     @GetMapping
     public List<Film> getFilms() {
         return new ArrayList<>(films.values());
