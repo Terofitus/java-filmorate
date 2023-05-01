@@ -13,13 +13,15 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import ru.yandex.practicum.filmorate.model.User;
-
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = UserController.class)
@@ -57,7 +59,7 @@ class UserControllerTest {
                 .accept(MediaType.APPLICATION_JSON).content(jsonUser)).andExpect(status().isOk());
         MvcResult result = mockMvc.perform(get("/users")).andExpect(status().isOk()).andReturn();
         List<User> users = mapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<List<User>>() {
+                 new TypeReference<List<User>>() {
                 });
         User userOut = users.get(0);
         assertEquals(userIn, userOut);
