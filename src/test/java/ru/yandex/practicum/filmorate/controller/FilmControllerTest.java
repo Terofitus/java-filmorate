@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,6 +17,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -29,7 +32,7 @@ class FilmControllerTest {
     private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
     @AfterEach
-    void deleteAllFilms() throws Exception {
+    void testDeleteAllFilms() throws Exception {
         mockMvc.perform(delete("/films"));
     }
 
@@ -75,11 +78,10 @@ class FilmControllerTest {
         assertEquals(updatedFilm, filmOut);
     }
 
-    @Test
-    void shouldReturnStatus400WhenCallMethodPostAndNameEqualsNullOrIsBlank() throws Exception {
-        Film film = new Film(null, null, "description",
-                LocalDate.of(2000, 5, 4), 120);
-        String json = mapper.writeValueAsString(film);
+    @ParameterizedTest
+    @MethodSource
+    void shouldReturnStatus400WhenCallMethodPostAndFilmIsIncorrect(Film incorrectFilm) throws Exception {
+        String json = mapper.writeValueAsString(incorrectFilm);
         mockMvc.perform(post("/films").contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isBadRequest());
 
@@ -90,52 +92,26 @@ class FilmControllerTest {
                 .accept(MediaType.APPLICATION_JSON).content(json2)).andExpect(status().isBadRequest());
     }
 
-    @Test
-    void shouldReturnStatus400WhenCallMethodPostAndDescriptionEqualsNullOrIsBlankOrLengthIsMoreThen200()
-            throws Exception {
-        Film film = new Film(null, "Name", null,
-                LocalDate.of(2000, 5, 4), 120);
-        String json = mapper.writeValueAsString(film);
-        mockMvc.perform(post("/films").contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isBadRequest());
-
-        Film film2 = new Film(null, "Name", "   ",
-                LocalDate.of(2000, 5, 4), 120);
-        String json2 = mapper.writeValueAsString(film2);
-        mockMvc.perform(post("/films").contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON).content(json2)).andExpect(status().isBadRequest());
-
-        Film film3 = new Film(null, "Name", "123456789101111111120222222223033333333404444444450" +
-                "55555555606666666670777777778088888888909999999910011111111111111111" +
-                "123456789101111111120222222223033333333404444444450" +
-                "55555555606666666670777777778088888888909999999910011111111111111111",
-                LocalDate.of(2000, 5, 4), 120);
-        String json3 = mapper.writeValueAsString(film3);
-        mockMvc.perform(post("/films").contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON).content(json3)).andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void shouldReturnStatus400WhenCallMethodPostAndReleaseDateIsEarlierThan28_12_1895() throws Exception {
-        Film film = new Film(null, "Name", "description",
-                LocalDate.of(1800, 5, 4), 120);
-        String json = mapper.writeValueAsString(film);
-        mockMvc.perform(post("/films").contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void shouldReturnStatus400WhenCallMethodPostAndDurationEquals0OrNegative() throws Exception {
-        Film film = new Film(null, "Name", "description",
-                LocalDate.of(2000, 5, 4), 0);
-        String json = mapper.writeValueAsString(film);
-        mockMvc.perform(post("/films").contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isBadRequest());
-
-        Film film2 = new Film(null, "Name", "description",
-                LocalDate.of(2000, 5, 4), -120);
-        String json2 = mapper.writeValueAsString(film2);
-        mockMvc.perform(post("/films").contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON).content(json2)).andExpect(status().isBadRequest());
+    private static Stream<Film> shouldReturnStatus400WhenCallMethodPostAndFilmIsIncorrect() {
+        return Stream.of(new Film(null, null, "description",
+                LocalDate.of(2000, 5, 4), 120),
+                new Film(null, "  ", "description",
+                        LocalDate.of(2000, 5, 4), 120),
+                new Film(null, "Name", null,
+                        LocalDate.of(2000, 5, 4), 120),
+                new Film(null, "Name", "   ",
+                        LocalDate.of(2000, 5, 4), 120),
+                new Film(null, "Name", "123456789101111111120222222223033333333404444444450" +
+                        "55555555606666666670777777778088888888909999999910011111111111111111" +
+                        "123456789101111111120222222223033333333404444444450" +
+                        "55555555606666666670777777778088888888909999999910011111111111111111",
+                        LocalDate.of(2000, 5, 4), 120),
+                new Film(null, "Name", "description",
+                        LocalDate.of(1800, 5, 4), 120),
+                new Film(null, "Name", "description",
+                        LocalDate.of(2000, 5, 4), 0),
+                new Film(null, "Name", "description",
+                        LocalDate.of(2000, 5, 4), -120)
+        );
     }
 }

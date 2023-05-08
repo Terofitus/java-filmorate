@@ -5,8 +5,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,6 +20,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -29,19 +32,19 @@ class UserControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-    private User userIn;
-    private String jsonUser;
-    private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    private static User userIn;
+    private static String jsonUser;
+    private static final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
-    @BeforeEach
-    void createUserAndParseInJson() throws JsonProcessingException {
+    @BeforeAll
+    static void testCreateUserAndParseInJson() throws JsonProcessingException {
         userIn = new User(null, "asd@mail.ru", "a", "s",
                 LocalDate.of(1900, Month.DECEMBER, 8), null);
         jsonUser = mapper.writeValueAsString(userIn);
     }
 
     @AfterEach
-    void cleanHashMap() throws Exception {
+    void testCleanHashMap() throws Exception {
         mockMvc.perform(delete("/users"));
     }
 
@@ -79,65 +82,29 @@ class UserControllerTest {
         assertEquals(updatedUser, userOut);
     }
 
-    @Test
-    void shouldReturnStatus400WhenCallMethodPostAndUserDontHasEmail() throws Exception {
-        User incorrectUser = new User(null, null, "a", "s",
-                LocalDate.of(1900, Month.DECEMBER, 8), null);
+    @ParameterizedTest
+    @MethodSource
+    void shouldReturnStatus400WhenCallMethodPostAndUserIsIncorrect(User incorrectUser) throws Exception {
         String json = mapper.writeValueAsString(incorrectUser);
         mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isBadRequest());
     }
 
-    @Test
-    void shouldReturnStatus400WhenCallMethodPostAndUserDontHasLogin() throws Exception {
-        User incorrectUser = new User(null, "mail@mail.ru", null, "s",
-                LocalDate.of(1900, Month.DECEMBER, 8), null);
-        String json = mapper.writeValueAsString(incorrectUser);
-        mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void shouldReturnStatus400WhenCallMethodPostAndUserHasIncorrectEmail() throws Exception {
-        User incorrectUser = new User(null, "asasasas", "a", "s",
-                LocalDate.of(1900, Month.DECEMBER, 8), null);
-        String json = mapper.writeValueAsString(incorrectUser);
-        mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void shouldReturnStatus400WhenCallMethodPostAndUserHasBlankLogin() throws Exception {
-        User incorrectUser = new User(null, "mail@mail.ru", "", "s",
-                LocalDate.of(1900, Month.DECEMBER, 8), null);
-        String json = mapper.writeValueAsString(incorrectUser);
-        mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void shouldReturnStatus400WhenCallMethodPostAndUserHasSpaceInLogin() throws Exception {
-        User incorrectUser = new User(null, "mail@mail.ru", "sd ds", "s",
-                LocalDate.of(1900, Month.DECEMBER, 8), null);
-        String json = mapper.writeValueAsString(incorrectUser);
-        mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void shouldReturnStatus400WhenCallMethodPostAndUserHasBirthdayInFuture() throws Exception {
-        User incorrectUser = new User(null, "mail@mail.ru", "Login", "s",
-                LocalDate.of(2200, Month.DECEMBER, 8), null);
-        String json = mapper.writeValueAsString(incorrectUser);
-        mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void shouldReturnStatus400WhenCallMethodPostAndUserHasBirthdayEqualsNull() throws Exception {
-        User incorrectUser = new User(null, "mail@mail.ru", "nulo", "s", null, null);
-        String json = mapper.writeValueAsString(incorrectUser);
-        mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isBadRequest());
+    private static Stream<User> shouldReturnStatus400WhenCallMethodPostAndUserIsIncorrect() {
+        return Stream.of(
+                new User(null, null, "a", "s",
+                        LocalDate.of(1900, Month.DECEMBER, 8), null),
+                new User(null, "mail@mail.ru", null, "s",
+                        LocalDate.of(1900, Month.DECEMBER, 8), null),
+                new User(null, "asasasas", "a", "s",
+                        LocalDate.of(1900, Month.DECEMBER, 8), null),
+                new User(null, "mail@mail.ru", "", "s",
+                        LocalDate.of(1900, Month.DECEMBER, 8), null),
+                new User(null, "mail@mail.ru", "sd ds", "s",
+                        LocalDate.of(1900, Month.DECEMBER, 8), null),
+                new User(null, "mail@mail.ru", "Login", "s",
+                        LocalDate.of(2200, Month.DECEMBER, 8), null),
+                new User(null, "mail@mail.ru", "nulo", "s", null, null)
+        );
     }
 }
