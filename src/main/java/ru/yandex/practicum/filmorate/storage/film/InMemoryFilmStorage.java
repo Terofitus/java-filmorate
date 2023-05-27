@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 
 @Slf4j
-@Component
+@Repository
 public class InMemoryFilmStorage implements FilmStorage {
 
     private final HashMap<Integer, Film> films = new HashMap<>();
@@ -69,5 +69,15 @@ public class InMemoryFilmStorage implements FilmStorage {
         films.clear();
         generatedId = 1;
         log.info("Все фильмы удалены");
+    }
+
+    @Override
+    public void addLikeToFilm(Integer idOfUser, Integer idOfFilm) {
+        films.get(idOfFilm).getLikes().add(idOfUser);
+    }
+
+    @Override
+    public void deleteLikeFromFilm(Integer idOfUser, Integer idOfFilm) {
+        films.get(idOfFilm).getLikes().remove(idOfUser);
     }
 }

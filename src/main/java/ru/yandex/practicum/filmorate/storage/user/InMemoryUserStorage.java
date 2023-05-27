@@ -1,15 +1,17 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
-@Component
+@Repository
 public class InMemoryUserStorage implements UserStorage {
 
     private final HashMap<Integer, User> users = new HashMap<>();
@@ -72,5 +74,23 @@ public class InMemoryUserStorage implements UserStorage {
         users.clear();
         generatedId = 1;
         log.info("Все пользователи удалены");
+    }
+
+    @Override
+    public void addUserToFriends(Integer idOfUser, Integer idOfAddedUser) {
+        User userFriend = getUserById(idOfAddedUser);
+        userFriend.getFriends().add(idOfUser);
+    }
+
+    @Override
+    public void deleteUserFromFriends(Integer idOfUser, Integer idOfDeletedUser) {
+        User userFriend = getUserById(idOfDeletedUser);
+        userFriend.getFriends().remove(idOfUser);
+    }
+
+    @Override
+    public List<Integer> getFriendsOfUser(Integer id) {
+        return users.values().stream().filter(user -> user.getFriends().contains(id)).map(User::getId)
+                .collect(Collectors.toList());
     }
 }

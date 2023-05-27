@@ -1,12 +1,14 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,7 +19,8 @@ public class FilmService {
     private final UserStorage userStorage;
 
     @Autowired
-    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
+    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
+                       @Qualifier("userDbStorage") UserStorage userStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
     }
@@ -48,16 +51,17 @@ public class FilmService {
 
     public void addLikeToFilm(Integer idOfUser, Integer idOfFilm) {
         User user = userStorage.getUserById(idOfUser);
-        filmStorage.getFilmById(idOfFilm).getLikes().add(user.getId());
+        filmStorage.addLikeToFilm(user.getId(), idOfFilm);
     }
 
     public void deleteLikeFromFilm(Integer idOfUser, Integer idOfFilm) {
         User user = userStorage.getUserById(idOfUser);
-        filmStorage.getFilmById(idOfFilm).getLikes().remove(user.getId());
+        filmStorage.deleteLikeFromFilm(user.getId(), idOfFilm);
     }
 
     public List<Film> getMostPopularFilms(Integer count) {
-        return filmStorage.getAllFilms().stream().sorted((o1, o2) -> (o1.getLikes().size() - o2.getLikes().size()) * -1)
-                .limit(count).collect(Collectors.toList());
+        List<Film> films = filmStorage.getAllFilms();
+        return films.stream().sorted(Comparator.comparingInt((Film o) -> o.getLikes().size())
+                .thenComparingInt(Film::getId)).limit(count).collect(Collectors.toList());
     }
 }

@@ -17,4 +17,10 @@ public interface UserStorage {
     void deleteUserFromStorageById(Integer id);
 
     void deleteAllUsers();
+
+    void addUserToFriends(Integer idOfUser, Integer idOfAddedUser);
+
+    void deleteUserFromFriends(Integer idOfUser, Integer idOfDeletedUser);
+
+    List<Integer> getFriendsOfUser(Integer id);
 }
