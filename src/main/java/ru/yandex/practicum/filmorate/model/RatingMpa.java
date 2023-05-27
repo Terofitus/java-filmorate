@@ -27,7 +27,6 @@ public enum RatingMpa {
                 return rating;
             }
         }
-
         return null;
     }
 }

@@ -28,7 +28,6 @@ public enum Genre {
                 return genre;
             }
         }
-
         return null;
     }
 }
