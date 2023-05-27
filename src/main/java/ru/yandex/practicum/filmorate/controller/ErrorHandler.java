@@ -27,7 +27,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse ObjectAlreadyAddedException(final ObjectAlreadyAddedException e) {
+    public ErrorResponse handleObjectAlreadyAddedException(final ObjectAlreadyAddedException e) {
         return new ErrorResponse(e.getMessage());
     }
 
