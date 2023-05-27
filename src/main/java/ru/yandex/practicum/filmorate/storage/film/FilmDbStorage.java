@@ -140,10 +140,10 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private Film makeFilm(ResultSet resultSet, int rowNum) throws SQLException {
-        Film film = Film.builder().id(resultSet.getInt("id")).name(resultSet.getString("name")).
-                description(resultSet.getString("description")).
-                releaseDate(resultSet.getDate("release_date").toLocalDate()).
-                duration(resultSet.getInt("duration")).build();
+        Film film = Film.builder().id(resultSet.getInt("id")).name(resultSet.getString("name"))
+            .description(resultSet.getString("description"))
+            .releaseDate(resultSet.getDate("release_date").toLocalDate())
+            .duration(resultSet.getInt("duration")).build();
 
         switch (resultSet.getInt("rating_id")) {
             case 1:
