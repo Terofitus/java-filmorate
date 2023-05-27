@@ -15,7 +15,7 @@ public class GenreController {
     @GetMapping("/genres")
     public Set<Genre> getAllGenres() {
         Set<Genre> genres = new LinkedHashSet<>();
-        for(int i = 1; i <= Genre.values().length; i++) {
+        for (int i = 1; i <= Genre.values().length; i++) {
             genres.add(Genre.forValues(i));
         }
         return genres;
