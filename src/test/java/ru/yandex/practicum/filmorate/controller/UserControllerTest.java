@@ -80,8 +80,8 @@ class UserControllerTest {
         User updatedUser = new User(1, "mail@mail.ru", "Login", "Name",
                 LocalDate.of(1999, 2, 2), null);
         String updatedUserInJson = mapper.writeValueAsString(updatedUser);
-        MvcResult result = mockMvc.perform(put("/users").contentType(MediaType.APPLICATION_JSON).
-                content(updatedUserInJson)).andExpect(status().isOk()).andReturn();
+        MvcResult result = mockMvc.perform(put("/users").contentType(MediaType.APPLICATION_JSON)
+                .content(updatedUserInJson)).andExpect(status().isOk()).andReturn();
         User userOut = mapper.readValue(result.getResponse().getContentAsString(), User.class);
         assertEquals(updatedUser, userOut);
     }

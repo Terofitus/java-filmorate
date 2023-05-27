@@ -145,12 +145,11 @@ public class UserDbStorage implements UserStorage {
     }
 
     private User makeUser(ResultSet resultSet, int rowNum) throws SQLException {
-        User user = User.builder().login(resultSet.getString("login")).
-                id(resultSet.getInt("id")).
-                email(resultSet.getString("email")).
-                name(resultSet.getString("name")).
-                birthday(resultSet.getDate("birthday").toLocalDate()).
-                build();
+        User user = User.builder().login(resultSet.getString("login"))
+            .id(resultSet.getInt("id"))
+            .email(resultSet.getString("email"))
+            .name(resultSet.getString("name"))
+            .birthday(resultSet.getDate("birthday").toLocalDate()).build();
         Set<Integer> friends = new HashSet<>();
         int idFriend;
         while (resultSet.next()) {
