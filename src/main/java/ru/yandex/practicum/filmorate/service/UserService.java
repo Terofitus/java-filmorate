@@ -55,7 +55,7 @@ public class UserService {
     }
 
     public void deleteUserFromFriends(Integer idOfUser, Integer idOfDeletedUser) {
-        userStorage.deleteUserFromFriends(idOfUser,idOfDeletedUser);
+        userStorage.deleteUserFromFriends(idOfUser, idOfDeletedUser);
     }
 
     public List<User> getListOfCommonFriends(Integer idOfUser, Integer idOfOtherUser) {

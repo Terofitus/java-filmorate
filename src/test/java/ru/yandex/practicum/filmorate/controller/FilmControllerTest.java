@@ -143,7 +143,7 @@ class FilmControllerTest {
                 .accept(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isBadRequest());
 
         Film film2 = new Film(null, "  ", "description",
-                LocalDate.of(2000, 5, 4), 120,1);
+                LocalDate.of(2000, 5, 4), 120, 1);
         String json2 = mapper.writeValueAsString(film2);
         mockMvc.perform(post("/films").contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON).content(json2)).andExpect(status().isBadRequest());
@@ -151,7 +151,7 @@ class FilmControllerTest {
 
     private static Stream<Film> testShouldReturnStatus400WhenCallMethodPostAndFilmIsIncorrect() {
         return Stream.of(new Film(null, null, "description",
-                LocalDate.of(2000, 5, 4), 120, 5),
+                        LocalDate.of(2000, 5, 4), 120, 5),
                 new Film(null, "  ", "description",
                         LocalDate.of(2000, 5, 4), 120, 4),
                 new Film(null, "Name", null,

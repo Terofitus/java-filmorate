@@ -46,7 +46,7 @@ public class FilmDbStorage implements FilmStorage {
         String sqlQuery = "SELECT f.id, f.name, f.description, f.release_date, f.duration, r.id AS rating_id" +
                 " FROM films AS f LEFT JOIN rating_mpa AS r ON f.rating_id = r.id";
         log.info("Запрошенны все фильмы.");
-        List<Film>  films = jdbcTemplate.query(sqlQuery, this::makeFilm);
+        List<Film> films = jdbcTemplate.query(sqlQuery, this::makeFilm);
         films.forEach(this::addGenresAndLikesToFilm);
         return films;
     }

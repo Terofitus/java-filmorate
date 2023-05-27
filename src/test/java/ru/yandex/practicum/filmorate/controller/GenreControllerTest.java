@@ -38,10 +38,11 @@ class GenreControllerTest {
         assertEquals(Genre.COMEDY, returnedGenre);
     }
 
-    @Test void testShouldReturnStatus200AndListOfGenreMpaWhenCallMethodGet() throws Exception {
+    @Test
+    void testShouldReturnStatus200AndListOfGenreMpaWhenCallMethodGet() throws Exception {
         MvcResult result = mockMvc.perform(get("/genres")).andExpect(status().isOk()).andReturn();
         List<Genre> returnedGenres = mapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<List<Genre>>() {});
+                new TypeReference<List<Genre>>(){});
         assertEquals(6, returnedGenres.size());
     }
 }

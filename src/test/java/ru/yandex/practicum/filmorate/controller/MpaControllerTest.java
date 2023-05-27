@@ -36,7 +36,8 @@ class MpaControllerTest {
         assertEquals(RatingMpa.G, returnedRating);
     }
 
-    @Test void testShouldReturnStatus200AndListOfRatingMpaWhenCallMethodGet() throws Exception {
+    @Test
+    void testShouldReturnStatus200AndListOfRatingMpaWhenCallMethodGet() throws Exception {
         MvcResult result = mockMvc.perform(get("/mpa")).andExpect(status().isOk()).andReturn();
         List<RatingMpa> returnedRatings = mapper.readValue(result.getResponse().getContentAsString(),
                 new TypeReference<List<RatingMpa>>() {});

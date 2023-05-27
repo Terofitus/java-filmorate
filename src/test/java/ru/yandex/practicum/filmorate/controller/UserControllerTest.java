@@ -68,7 +68,7 @@ class UserControllerTest {
                 .accept(MediaType.APPLICATION_JSON).content(jsonUser)).andExpect(status().isOk());
         MvcResult result = mockMvc.perform(get("/users")).andExpect(status().isOk()).andReturn();
         List<User> users = mapper.readValue(result.getResponse().getContentAsString(),
-                 new TypeReference<List<User>>(){});
+                new TypeReference<List<User>>(){});
         User userOut = users.get(0);
         assertEquals(userIn, userOut);
     }
@@ -80,12 +80,11 @@ class UserControllerTest {
         User updatedUser = new User(1, "mail@mail.ru", "Login", "Name",
                 LocalDate.of(1999, 2, 2), null);
         String updatedUserInJson = mapper.writeValueAsString(updatedUser);
-        MvcResult result = mockMvc.perform(put("/users").contentType(MediaType.APPLICATION_JSON)
-                        .content(updatedUserInJson)).andExpect(status().isOk()).andReturn();
+        MvcResult result = mockMvc.perform(put("/users").contentType(MediaType.APPLICATION_JSON).
+                content(updatedUserInJson)).andExpect(status().isOk()).andReturn();
         User userOut = mapper.readValue(result.getResponse().getContentAsString(), User.class);
         assertEquals(updatedUser, userOut);
     }
-
 
 
     @ParameterizedTest
