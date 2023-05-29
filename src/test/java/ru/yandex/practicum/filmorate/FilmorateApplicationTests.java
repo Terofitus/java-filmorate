@@ -11,7 +11,7 @@ import org.springframework.test.annotation.DirtiesContext;
 class FilmorateApplicationTests {
 
     @Test
-    void contextLoads() {
+    protected void contextLoads() {
     }
 
 }

@@ -40,23 +40,23 @@ class FilmControllerTest {
     private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
     @AfterEach
-    void testDeleteAllFilms() throws Exception {
+    protected void testDeleteAllFilms() throws Exception {
         mockMvc.perform(delete("/films"));
     }
 
     @Test
-    void testShouldReturnStatus200WhenCallMethodPost() throws Exception {
+    protected void testShouldReturnStatus200WhenCallMethodPost() throws Exception {
         Film film = new Film(null, "Name", "description",
                 LocalDate.of(2000, 5, 4), 120, 5);
         String json = mapper.writeValueAsString(film);
         MvcResult result = mockMvc.perform(post("/films").contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isOk()).andReturn();
         Film filmOut = mapper.readValue(result.getResponse().getContentAsString(), Film.class);
-        assertEquals(film, filmOut);
+        assertEquals(film, filmOut, "Возвращенный фильм в результате метода post не равен переданному.");
     }
 
     @Test
-    void testShouldReturnStatus200WhenCallMethodGet() throws Exception {
+    protected void testShouldReturnStatus200WhenCallMethodGet() throws Exception {
         Film film = new Film(null, "Name", "description",
                 LocalDate.of(2000, 5, 4), 120, 2);
         String json = mapper.writeValueAsString(film);
@@ -67,11 +67,12 @@ class FilmControllerTest {
                 new TypeReference<List<Film>>() {
                 });
         Film filmOut = films.get(0);
-        assertEquals(film, filmOut);
+        assertEquals(film, filmOut, "Содержимое возвращенного списка фильмов в результате метода get " +
+                "не равно заранее добавленным фильмам методом post.");
     }
 
     @Test
-    void testShouldReturnStatus200WhenCallMethodPut() throws Exception {
+    protected void testShouldReturnStatus200WhenCallMethodPut() throws Exception {
         Film film = new Film(null, "Name", "description",
                 LocalDate.of(2000, 5, 4), 120, 3);
         String json = mapper.writeValueAsString(film);
@@ -83,11 +84,12 @@ class FilmControllerTest {
         MvcResult result = mockMvc.perform(put("/films").contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON).content(updatedFilmInJson)).andExpect(status().isOk()).andReturn();
         Film filmOut = mapper.readValue(result.getResponse().getContentAsString(), Film.class);
-        assertEquals(updatedFilm, filmOut);
+        assertEquals(updatedFilm, filmOut, "Возвращенный фильм не равен в результате метода put не равен" +
+                "ему же до отправления.");
     }
 
     @Test
-    public void testShouldReturnStatus200AndGetFilmByIdWhenCallMethodGet() throws Exception {
+    protected void testShouldReturnStatus200AndGetFilmByIdWhenCallMethodGet() throws Exception {
         Film film = new Film(null, "Name", "description",
                 LocalDate.of(2000, 5, 4), 120, 3);
         String json = mapper.writeValueAsString(film);
@@ -95,11 +97,12 @@ class FilmControllerTest {
                 .accept(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isOk());
         MvcResult result = mockMvc.perform(get("/films/1")).andExpect(status().isOk()).andReturn();
         Film returnedFilm = mapper.readValue(result.getResponse().getContentAsString(), Film.class);
-        assertEquals(film, returnedFilm);
+        assertEquals(film, returnedFilm, "Возвращенный фильм в результате метода get " +
+                "не равен ему же заранее добавленному методом post.");
     }
 
     @Test
-    public void testShouldReturnStatus200AndDeleteFromStorageFilmByIdWhenCallMethodDelete() throws Exception {
+    protected void testShouldReturnStatus200AndDeleteFromStorageFilmByIdWhenCallMethodDelete() throws Exception {
         Film film = new Film(null, "Name", "description",
                 LocalDate.of(2000, 5, 4), 120, 3);
         String json = mapper.writeValueAsString(film);
@@ -110,7 +113,7 @@ class FilmControllerTest {
     }
 
     @Test
-    public void testShouldReturnStatus200WhenAddLikeToFilmAndDeleteLikeFromFilm() throws Exception {
+    protected void testShouldReturnStatus200WhenAddLikeToFilmAndDeleteLikeFromFilm() throws Exception {
         Film film = new Film(null, "Name", "description",
                 LocalDate.of(2000, 5, 4), 120, 3);
         String json = mapper.writeValueAsString(film);
@@ -127,17 +130,18 @@ class FilmControllerTest {
 
         MvcResult result = mockMvc.perform(get("/films/1")).andExpect(status().isOk()).andReturn();
         Film returnedFilm = mapper.readValue(result.getResponse().getContentAsString(), Film.class);
-        assertEquals(1, returnedFilm.getLikes().size());
+        assertEquals(1, returnedFilm.getLikes().size(), "Возвращенный фильм не имеет заранее" +
+                " поставленного лайка.");
 
         mockMvc.perform(delete("/films/1/like/1")).andExpect(status().isOk());
         MvcResult result2 = mockMvc.perform(get("/films/1")).andExpect(status().isOk()).andReturn();
         Film returnedFilm2 = mapper.readValue(result2.getResponse().getContentAsString(), Film.class);
-        assertEquals(0, returnedFilm2.getLikes().size());
+        assertEquals(0, returnedFilm2.getLikes().size(), "Возвращенный фильм имеет не 0 лайков.");
     }
 
     @ParameterizedTest
     @MethodSource
-    void testShouldReturnStatus400WhenCallMethodPostAndFilmIsIncorrect(Film incorrectFilm) throws Exception {
+    protected void testShouldReturnStatus400WhenCallMethodPostAndFilmIsIncorrect(Film incorrectFilm) throws Exception {
         String json = mapper.writeValueAsString(incorrectFilm);
         mockMvc.perform(post("/films").contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isBadRequest());

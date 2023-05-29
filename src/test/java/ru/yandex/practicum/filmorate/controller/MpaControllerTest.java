@@ -30,17 +30,17 @@ class MpaControllerTest {
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Test
-    public void testShouldReturnStatus200AndRatingMpaWhenCallMethodGet() throws Exception {
+    protected void testShouldReturnStatus200AndRatingMpaWhenCallMethodGet() throws Exception {
         MvcResult result = mockMvc.perform(get("/mpa/1")).andExpect(status().isOk()).andReturn();
         RatingMpa returnedRating = mapper.readValue(result.getResponse().getContentAsString(), RatingMpa.class);
-        assertEquals(RatingMpa.G, returnedRating);
+        assertEquals(RatingMpa.G, returnedRating, "Возвращенный рейтинг не равен запрошенному методом get.");
     }
 
     @Test
-    void testShouldReturnStatus200AndListOfRatingMpaWhenCallMethodGet() throws Exception {
+    protected void testShouldReturnStatus200AndListOfRatingMpaWhenCallMethodGet() throws Exception {
         MvcResult result = mockMvc.perform(get("/mpa")).andExpect(status().isOk()).andReturn();
         List<RatingMpa> returnedRatings = mapper.readValue(result.getResponse().getContentAsString(),
                 new TypeReference<List<RatingMpa>>() {});
-        assertEquals(5, returnedRatings.size());
+        assertEquals(5, returnedRatings.size(), "Размер возвращенного списка рейтингов не равен 5.");
     }
 }

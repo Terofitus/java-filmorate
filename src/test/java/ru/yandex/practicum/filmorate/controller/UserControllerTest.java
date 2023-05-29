@@ -50,31 +50,32 @@ class UserControllerTest {
     }
 
     @AfterEach
-    void testCleanHashMap() throws Exception {
+    protected void testCleanHashMap() throws Exception {
         mockMvc.perform(delete("/users"));
     }
 
     @Test
-    void testShouldReturnUserAndStatus200WhenCallMethodPost() throws Exception {
+    protected void testShouldReturnUserAndStatus200WhenCallMethodPost() throws Exception {
         MvcResult result = mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON).content(jsonUser)).andExpect(status().isOk()).andReturn();
         User userOut = mapper.readValue(result.getResponse().getContentAsString(), User.class);
-        assertEquals(userIn, userOut);
+        assertEquals(userIn, userOut, "Возвращенный пользователь методом post не равен добавленному.");
     }
 
     @Test
-    void testShouldReturnListOfUsersWithStatus200WhenCallMethodGet() throws Exception {
+    protected void testShouldReturnListOfUsersWithStatus200WhenCallMethodGet() throws Exception {
         mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON).content(jsonUser)).andExpect(status().isOk());
         MvcResult result = mockMvc.perform(get("/users")).andExpect(status().isOk()).andReturn();
         List<User> users = mapper.readValue(result.getResponse().getContentAsString(),
                 new TypeReference<List<User>>(){});
         User userOut = users.get(0);
-        assertEquals(userIn, userOut);
+        assertEquals(userIn, userOut, "Содержимое возвращенного списка пользователей методом get не равно " +
+                "добавленным пользователям.");
     }
 
     @Test
-    void testShouldUpdateUserAndReturnStatus200WhenCallMethodPut() throws Exception {
+    protected void testShouldUpdateUserAndReturnStatus200WhenCallMethodPut() throws Exception {
         mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON).content(jsonUser)).andExpect(status().isOk());
         User updatedUser = new User(1, "mail@mail.ru", "Login", "Name",
@@ -83,20 +84,21 @@ class UserControllerTest {
         MvcResult result = mockMvc.perform(put("/users").contentType(MediaType.APPLICATION_JSON)
                 .content(updatedUserInJson)).andExpect(status().isOk()).andReturn();
         User userOut = mapper.readValue(result.getResponse().getContentAsString(), User.class);
-        assertEquals(updatedUser, userOut);
+        assertEquals(updatedUser, userOut, "Возвращенный пользователь в результате метода post не равен" +
+                " ему же до добавления.");
     }
 
 
     @ParameterizedTest
     @MethodSource
-    void testShouldReturnStatus400WhenCallMethodPostAndUserIsIncorrect(User incorrectUser) throws Exception {
+    protected void testShouldReturnStatus400WhenCallMethodPostAndUserIsIncorrect(User incorrectUser) throws Exception {
         String json = mapper.writeValueAsString(incorrectUser);
         mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isBadRequest());
     }
 
     @Test
-    public void testShouldReturnStatus200AndDeleteFromStorageUserByIdWhenCallMethodDelete() throws Exception {
+    protected void testShouldReturnStatus200AndDeleteFromStorageUserByIdWhenCallMethodDelete() throws Exception {
         mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON).content(jsonUser)).andExpect(status().isOk());
         mockMvc.perform(delete("/users/1")).andExpect(status().isOk());
@@ -104,7 +106,7 @@ class UserControllerTest {
     }
 
     @Test
-    public void testShouldReturnStatus200WhenAddUserToFriendsAndDeleteUserFromFriends() throws Exception {
+    protected void testShouldReturnStatus200WhenAddUserToFriendsAndDeleteUserFromFriends() throws Exception {
         User userIn2 = new User(null, "aasd@mail.ru", "a", "s",
                 LocalDate.of(1900, Month.DECEMBER, 8), null);
         String jsonUser2 = mapper.writeValueAsString(userIn2);
@@ -118,17 +120,19 @@ class UserControllerTest {
         MvcResult result = mockMvc.perform(get("/users/1/friends")).andExpect(status().isOk()).andReturn();
         List<User> friendsOfUser = mapper.readValue(result.getResponse().getContentAsString(),
                 new TypeReference<List<User>>(){});
-        assertEquals(1, friendsOfUser.size());
+        assertEquals(1, friendsOfUser.size(), "Список друзей пользователя не равен 1 после добавления" +
+                " 1 друга.");
 
         mockMvc.perform(delete("/users/1/friends/2")).andExpect(status().isOk());
         MvcResult result2 = mockMvc.perform(get("/users/1/friends")).andExpect(status().isOk()).andReturn();
         List<User> friendsOfUser2 = mapper.readValue(result2.getResponse().getContentAsString(),
                 new TypeReference<List<User>>(){});
-        assertEquals(0, friendsOfUser2.size());
+        assertEquals(0, friendsOfUser2.size(), "Список друзей пользователя не равен 0 после " +
+                "удаления из друзей единственного друга.");
     }
 
     @Test
-    public void testShouldReturnStatus200AndListOfFriendsOfUserWhenCallMethodGet() throws Exception {
+    protected void testShouldReturnStatus200AndListOfFriendsOfUserWhenCallMethodGet() throws Exception {
         User userIn2 = new User(null, "fasd@mail.ru", "a", "s",
                 LocalDate.of(1900, Month.DECEMBER, 8), null);
         String jsonUser2 = mapper.writeValueAsString(userIn2);
@@ -142,7 +146,8 @@ class UserControllerTest {
         MvcResult result = mockMvc.perform(get("/users/1/friends")).andExpect(status().isOk()).andReturn();
         List<User> friendsOfUser = mapper.readValue(result.getResponse().getContentAsString(),
                 new TypeReference<List<User>>(){});
-        assertEquals(2, friendsOfUser.get(0).getId());
+        assertEquals(2, friendsOfUser.get(0).getId(), "Список друзей пользователя не содержит " +
+                "пользователя с id 2 после добавления его в друзья.");
     }
 
     private static Stream<User> testShouldReturnStatus400WhenCallMethodPostAndUserIsIncorrect() {

@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
@@ -12,10 +13,8 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.RatingMpa;
 
+import java.sql.*;
 import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.*;
 
 @Slf4j
@@ -57,15 +56,17 @@ public class FilmDbStorage implements FilmStorage {
                 "VALUES (?, ?, ?, ?, ?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(connection -> {
-            PreparedStatement stmt = connection.prepareStatement(sqlQuery2, new String[]{"id"});
+        PreparedStatementCreator connection = con -> {
+            PreparedStatement stmt = con.prepareStatement(sqlQuery2, new String[]{"id"});
             stmt.setString(1, film.getName());
             stmt.setString(2, film.getDescription());
             stmt.setDate(3, Date.valueOf(film.getReleaseDate()));
             stmt.setInt(4, film.getDuration());
             stmt.setInt(5, film.getRating().getId());
             return stmt;
-        }, keyHolder);
+
+        };
+        jdbcTemplate.update(connection, keyHolder);
         log.info("Был добавлен фильм с названием {} {} датой выпуска.", film.getName(), film.getReleaseDate());
         film.setId(keyHolder.getKey().intValue());
         if (film.getGenres() != null && film.getGenres().size() != 0) {
@@ -161,15 +162,17 @@ public class FilmDbStorage implements FilmStorage {
             case 5:
                 film.setRating(RatingMpa.NC17);
                 break;
+            default:
+                throw new ObjectNotFoundException("Запрошен рейтинг с несуществующим id.");
         }
         return film;
     }
 
-    private Film addGenresAndLikesToFilm(Film film) {
+    private void addGenresAndLikesToFilm(Film film) {
         List<Genre> genres = new ArrayList<>();
         try {
             genres = jdbcTemplate.query("SELECT genre_id FROM film_genre WHERE film_id = ?",
-                    this::makeGenre, film.getId());
+                    FilmDbStorage::makeGenre, film.getId());
         } catch (Exception e) {
             log.error("Ошибка вовремя добавления жанров к фильму с id = {}.", film.getId());
         }
@@ -177,7 +180,7 @@ public class FilmDbStorage implements FilmStorage {
         List<Integer> likes = new ArrayList<>();
         try {
             likes = jdbcTemplate.query("SELECT user_id FROM film_likes WHERE film_id = ?",
-                    this::makeLike, film.getId());
+                    FilmDbStorage::makeLike, film.getId());
         } catch (Exception e) {
             log.error("Ошибка во время попытки добавления лайков к фильму с id = {}.", film.getId());
         }
@@ -185,11 +188,11 @@ public class FilmDbStorage implements FilmStorage {
         return film;
     }
 
-    private Integer makeLike(ResultSet resultSet, int rowNum) throws SQLException {
+    private static Integer makeLike(ResultSet resultSet, int rowNum) throws SQLException {
         return resultSet.getInt("user_id");
     }
 
-    private Genre makeGenre(ResultSet resultSet, int rowNum) throws SQLException {
+    private static Genre makeGenre(ResultSet resultSet, int rowNum) throws SQLException {
         switch (resultSet.getInt("genre_id")) {
             case 1:
                 return Genre.COMEDY;
@@ -204,7 +207,7 @@ public class FilmDbStorage implements FilmStorage {
             case 6:
                 return Genre.ACTION;
             default:
-                return null;
+                throw new ObjectNotFoundException("Запрошен рейтинг с несуществующим id.");
         }
     }
 
@@ -220,8 +223,8 @@ public class FilmDbStorage implements FilmStorage {
 
     private void createFilmGenres(Set<Genre> genres, Integer film_id) {
         try {
-            jdbcTemplate.batchUpdate("INSERT INTO film_genre (film_id, genre_id) VALUES (?, ?)", genres, 100,
-                    (PreparedStatement ps, Genre genre) -> {
+            jdbcTemplate.batchUpdate("INSERT INTO film_genre (film_id, genre_id) VALUES (?, ?)",
+                    genres, 100, (PreparedStatement ps, Genre genre) -> {
                         ps.setInt(1, film_id);
                         ps.setInt(2, genre.getId());
                     });
