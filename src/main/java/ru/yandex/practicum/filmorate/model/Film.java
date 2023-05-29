@@ -40,8 +40,8 @@ public class Film {
     @EqualsAndHashCode.Exclude
     private LinkedHashSet<Genre> genres;
 
-
-    public Film(Integer id, String name, String description, LocalDate releaseDate, Integer duration, Integer ratingId) {
+    public Film(Integer id, String name, String description, LocalDate releaseDate,
+                Integer duration, Integer ratingId) {
         this.id = id;
         this.name = name;
         this.description = description;

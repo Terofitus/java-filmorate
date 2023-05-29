@@ -32,17 +32,18 @@ class GenreControllerTest {
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Test
-    public void testShouldReturnStatus200AndGenreWhenCallMethodGet() throws Exception {
+    protected void testShouldReturnStatus200AndGenreWhenCallMethodGet() throws Exception {
         MvcResult result = mockMvc.perform(get("/genres/1")).andExpect(status().isOk()).andReturn();
         Genre returnedGenre = mapper.readValue(result.getResponse().getContentAsString(), Genre.class);
-        assertEquals(Genre.COMEDY, returnedGenre);
+        assertEquals(Genre.COMEDY, returnedGenre, "Возвращенный жанр в результате метода get " +
+                "не соответствует запрошенному.");
     }
 
     @Test
-    void testShouldReturnStatus200AndListOfGenreMpaWhenCallMethodGet() throws Exception {
+    protected void testShouldReturnStatus200AndListOfGenreMpaWhenCallMethodGet() throws Exception {
         MvcResult result = mockMvc.perform(get("/genres")).andExpect(status().isOk()).andReturn();
         List<Genre> returnedGenres = mapper.readValue(result.getResponse().getContentAsString(),
                 new TypeReference<List<Genre>>(){});
-        assertEquals(6, returnedGenres.size());
+        assertEquals(6, returnedGenres.size(), "Размер возвращенного списка жанров не равен 6.");
     }
 }
