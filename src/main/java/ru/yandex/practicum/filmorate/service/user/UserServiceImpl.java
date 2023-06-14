@@ -1,28 +1,30 @@
-package ru.yandex.practicum.filmorate.service;
+package ru.yandex.practicum.filmorate.service.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-public class UserService {
+public class UserServiceImpl implements UserService {
 
     private final UserStorage userStorage;
 
     @Autowired
-    public UserService(UserStorage userStorage) {
+    public UserServiceImpl(@Qualifier("userDbStorage") UserStorage userStorage) {
         this.userStorage = userStorage;
     }
 
+    @Override
     public List<User> getAllUsers() {
         return userStorage.getAllUsers();
     }
 
+    @Override
     public User addUserToStorage(User user) {
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
@@ -30,46 +32,45 @@ public class UserService {
         return userStorage.addUserToStorage(user);
     }
 
+    @Override
     public User updateUserInStorage(User user) {
         return userStorage.updateUserInStorage(user);
     }
 
+    @Override
     public void deleteUserFromStorageById(Integer id) {
         userStorage.deleteUserFromStorageById(id);
     }
 
+    @Override
     public void deleteAllUsers() {
         userStorage.deleteAllUsers();
     }
 
+    @Override
     public User getUserById(Integer id) {
         return userStorage.getUserById(id);
     }
 
+    @Override
     public List<User> getListOfFriends(Integer id) {
-        return userStorage.getUserById(id).getFriends()
-                .stream().map(userStorage::getUserById).collect(Collectors.toList());
+        return userStorage.getFriendsOfUser(id).stream().map(userStorage::getUserById).collect(Collectors.toList());
     }
 
+    @Override
     public void addUserToFriends(Integer idOfUser, Integer idOfAddedUser) {
-        User user1 = userStorage.getUserById(idOfUser);
-        User user2 = userStorage.getUserById(idOfAddedUser);
-        user1.getFriends().add(idOfAddedUser);
-        user2.getFriends().add(idOfUser);
+        userStorage.addUserToFriends(idOfUser, idOfAddedUser);
     }
 
+    @Override
     public void deleteUserFromFriends(Integer idOfUser, Integer idOfDeletedUser) {
-        User user1 = userStorage.getUserById(idOfUser);
-        User user2 = userStorage.getUserById(idOfDeletedUser);
-        user1.getFriends().remove(idOfDeletedUser);
-        user2.getFriends().remove(idOfUser);
+        userStorage.deleteUserFromFriends(idOfUser, idOfDeletedUser);
     }
 
+    @Override
     public List<User> getListOfCommonFriends(Integer idOfUser, Integer idOfOtherUser) {
-        User user1 = userStorage.getUserById(idOfUser);
-        User user2 = userStorage.getUserById(idOfOtherUser);
-        Set<Integer> friendsOfFirstUser = user1.getFriends();
-        Set<Integer> friendsOfSecondUser = user2.getFriends();
+        List<Integer> friendsOfFirstUser = userStorage.getFriendsOfUser(idOfUser);
+        List<Integer> friendsOfSecondUser = userStorage.getFriendsOfUser(idOfOtherUser);
         return friendsOfFirstUser.stream()
                 .filter(friendsOfSecondUser::contains)
                 .map(userStorage::getUserById)
