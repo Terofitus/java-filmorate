@@ -24,10 +24,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class MpaControllerTest {
 
+    private final ObjectMapper mapper = new ObjectMapper();
     @Autowired
     private MockMvc mockMvc;
-
-    private final ObjectMapper mapper = new ObjectMapper();
 
     @Test
     protected void testShouldReturnStatus200AndRatingMpaWhenCallMethodGet() throws Exception {
@@ -40,7 +39,8 @@ class MpaControllerTest {
     protected void testShouldReturnStatus200AndListOfRatingMpaWhenCallMethodGet() throws Exception {
         MvcResult result = mockMvc.perform(get("/mpa")).andExpect(status().isOk()).andReturn();
         List<RatingMpa> returnedRatings = mapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<List<RatingMpa>>() {});
+                new TypeReference<List<RatingMpa>>() {
+                });
         assertEquals(5, returnedRatings.size(), "Размер возвращенного списка рейтингов не равен 5.");
     }
 }

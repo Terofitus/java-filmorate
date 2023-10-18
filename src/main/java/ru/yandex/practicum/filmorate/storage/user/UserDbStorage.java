@@ -15,10 +15,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @Repository("userDbStorage")
@@ -64,7 +61,7 @@ public class UserDbStorage implements UserStorage {
         };
         jdbcTemplate.update(connection, keyHolder);
         log.info("Был добавлен пользователь с логином {} и email {}.", user.getLogin(), user.getEmail());
-        user.setId(keyHolder.getKey().intValue());
+        user.setId(Objects.requireNonNull(keyHolder.getKey()).intValue());
         return user;
     }
 
@@ -148,10 +145,10 @@ public class UserDbStorage implements UserStorage {
 
     private User makeUser(ResultSet resultSet, int rowNum) throws SQLException {
         User user = User.builder().login(resultSet.getString("login"))
-            .id(resultSet.getInt("id"))
-            .email(resultSet.getString("email"))
-            .name(resultSet.getString("name"))
-            .birthday(resultSet.getDate("birthday").toLocalDate()).build();
+                .id(resultSet.getInt("id"))
+                .email(resultSet.getString("email"))
+                .name(resultSet.getString("name"))
+                .birthday(resultSet.getDate("birthday").toLocalDate()).build();
         Set<Integer> friends = new HashSet<>();
         int idFriend;
         while (resultSet.next()) {

@@ -26,10 +26,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class GenreControllerTest {
 
+    private final ObjectMapper mapper = new ObjectMapper();
     @Autowired
     private MockMvc mockMvc;
-
-    private final ObjectMapper mapper = new ObjectMapper();
 
     @Test
     protected void testShouldReturnStatus200AndGenreWhenCallMethodGet() throws Exception {
@@ -43,7 +42,8 @@ class GenreControllerTest {
     protected void testShouldReturnStatus200AndListOfGenreMpaWhenCallMethodGet() throws Exception {
         MvcResult result = mockMvc.perform(get("/genres")).andExpect(status().isOk()).andReturn();
         List<Genre> returnedGenres = mapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<List<Genre>>(){});
+                new TypeReference<List<Genre>>() {
+                });
         assertEquals(6, returnedGenres.size(), "Размер возвращенного списка жанров не равен 6.");
     }
 }

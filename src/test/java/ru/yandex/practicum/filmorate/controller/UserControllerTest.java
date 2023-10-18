@@ -36,17 +36,35 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class UserControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    private static final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
     private static User userIn;
     private static String jsonUser;
-    private static final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    @Autowired
+    private MockMvc mockMvc;
 
     @BeforeAll
     static void testCreateUserAndParseInJson() throws JsonProcessingException {
         userIn = new User(null, "asd@mail.ru", "a", "s",
                 LocalDate.of(1900, Month.DECEMBER, 8), null);
         jsonUser = mapper.writeValueAsString(userIn);
+    }
+
+    private static Stream<User> testShouldReturnStatus400WhenCallMethodPostAndUserIsIncorrect() {
+        return Stream.of(
+                new User(null, null, "a", "s",
+                        LocalDate.of(1900, Month.DECEMBER, 8), null),
+                new User(null, "mail@mail.ru", null, "s",
+                        LocalDate.of(1900, Month.DECEMBER, 8), null),
+                new User(null, "asasasas", "a", "s",
+                        LocalDate.of(1900, Month.DECEMBER, 8), null),
+                new User(null, "mail@mail.ru", "", "s",
+                        LocalDate.of(1900, Month.DECEMBER, 8), null),
+                new User(null, "mail@mail.ru", "sd ds", "s",
+                        LocalDate.of(1900, Month.DECEMBER, 8), null),
+                new User(null, "mail@mail.ru", "Login", "s",
+                        LocalDate.of(2200, Month.DECEMBER, 8), null),
+                new User(null, "mail@mail.ru", "nulo", "s", null, null)
+        );
     }
 
     @AfterEach
@@ -68,7 +86,8 @@ class UserControllerTest {
                 .accept(MediaType.APPLICATION_JSON).content(jsonUser)).andExpect(status().isOk());
         MvcResult result = mockMvc.perform(get("/users")).andExpect(status().isOk()).andReturn();
         List<User> users = mapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<List<User>>(){});
+                new TypeReference<List<User>>() {
+                });
         User userOut = users.get(0);
         assertEquals(userIn, userOut, "Содержимое возвращенного списка пользователей методом get не равно " +
                 "добавленным пользователям.");
@@ -87,7 +106,6 @@ class UserControllerTest {
         assertEquals(updatedUser, userOut, "Возвращенный пользователь в результате метода post не равен" +
                 " ему же до добавления.");
     }
-
 
     @ParameterizedTest
     @MethodSource
@@ -119,14 +137,16 @@ class UserControllerTest {
 
         MvcResult result = mockMvc.perform(get("/users/1/friends")).andExpect(status().isOk()).andReturn();
         List<User> friendsOfUser = mapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<List<User>>(){});
+                new TypeReference<List<User>>() {
+                });
         assertEquals(1, friendsOfUser.size(), "Список друзей пользователя не равен 1 после добавления" +
                 " 1 друга.");
 
         mockMvc.perform(delete("/users/1/friends/2")).andExpect(status().isOk());
         MvcResult result2 = mockMvc.perform(get("/users/1/friends")).andExpect(status().isOk()).andReturn();
         List<User> friendsOfUser2 = mapper.readValue(result2.getResponse().getContentAsString(),
-                new TypeReference<List<User>>(){});
+                new TypeReference<List<User>>() {
+                });
         assertEquals(0, friendsOfUser2.size(), "Список друзей пользователя не равен 0 после " +
                 "удаления из друзей единственного друга.");
     }
@@ -145,26 +165,9 @@ class UserControllerTest {
 
         MvcResult result = mockMvc.perform(get("/users/1/friends")).andExpect(status().isOk()).andReturn();
         List<User> friendsOfUser = mapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<List<User>>(){});
+                new TypeReference<List<User>>() {
+                });
         assertEquals(2, friendsOfUser.get(0).getId(), "Список друзей пользователя не содержит " +
                 "пользователя с id 2 после добавления его в друзья.");
-    }
-
-    private static Stream<User> testShouldReturnStatus400WhenCallMethodPostAndUserIsIncorrect() {
-        return Stream.of(
-                new User(null, null, "a", "s",
-                        LocalDate.of(1900, Month.DECEMBER, 8), null),
-                new User(null, "mail@mail.ru", null, "s",
-                        LocalDate.of(1900, Month.DECEMBER, 8), null),
-                new User(null, "asasasas", "a", "s",
-                        LocalDate.of(1900, Month.DECEMBER, 8), null),
-                new User(null, "mail@mail.ru", "", "s",
-                        LocalDate.of(1900, Month.DECEMBER, 8), null),
-                new User(null, "mail@mail.ru", "sd ds", "s",
-                        LocalDate.of(1900, Month.DECEMBER, 8), null),
-                new User(null, "mail@mail.ru", "Login", "s",
-                        LocalDate.of(2200, Month.DECEMBER, 8), null),
-                new User(null, "mail@mail.ru", "nulo", "s", null, null)
-        );
     }
 }
