@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -35,13 +34,31 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class FilmControllerTest {
 
+    private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
     @Autowired
     private MockMvc mockMvc;
-    private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
-    @AfterEach
-    protected void testDeleteAllFilms() throws Exception {
-        mockMvc.perform(delete("/films"));
+    private static Stream<Film> testShouldReturnStatus400WhenCallMethodPostAndFilmIsIncorrect() {
+        return Stream.of(new Film(null, null, "description",
+                        LocalDate.of(2000, 5, 4), 120, 5),
+                new Film(null, "  ", "description",
+                        LocalDate.of(2000, 5, 4), 120, 4),
+                new Film(null, "Name", null,
+                        LocalDate.of(2000, 5, 4), 120, 3),
+                new Film(null, "Name", "   ",
+                        LocalDate.of(2000, 5, 4), 120, 2),
+                new Film(null, "Name", "123456789101111111120222222223033333333404444444450" +
+                        "55555555606666666670777777778088888888909999999910011111111111111111" +
+                        "123456789101111111120222222223033333333404444444450" +
+                        "55555555606666666670777777778088888888909999999910011111111111111111",
+                        LocalDate.of(2000, 5, 4), 120, 2),
+                new Film(null, "Name", "description",
+                        LocalDate.of(1800, 5, 4), 120, 3),
+                new Film(null, "Name", "description",
+                        LocalDate.of(2000, 5, 4), 0, 4),
+                new Film(null, "Name", "description",
+                        LocalDate.of(2000, 5, 4), -120, 5)
+        );
     }
 
     @Test
@@ -151,28 +168,5 @@ class FilmControllerTest {
         String json2 = mapper.writeValueAsString(film2);
         mockMvc.perform(post("/films").contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON).content(json2)).andExpect(status().isBadRequest());
-    }
-
-    private static Stream<Film> testShouldReturnStatus400WhenCallMethodPostAndFilmIsIncorrect() {
-        return Stream.of(new Film(null, null, "description",
-                        LocalDate.of(2000, 5, 4), 120, 5),
-                new Film(null, "  ", "description",
-                        LocalDate.of(2000, 5, 4), 120, 4),
-                new Film(null, "Name", null,
-                        LocalDate.of(2000, 5, 4), 120, 3),
-                new Film(null, "Name", "   ",
-                        LocalDate.of(2000, 5, 4), 120, 2),
-                new Film(null, "Name", "123456789101111111120222222223033333333404444444450" +
-                        "55555555606666666670777777778088888888909999999910011111111111111111" +
-                        "123456789101111111120222222223033333333404444444450" +
-                        "55555555606666666670777777778088888888909999999910011111111111111111",
-                        LocalDate.of(2000, 5, 4), 120, 2),
-                new Film(null, "Name", "description",
-                        LocalDate.of(1800, 5, 4), 120, 3),
-                new Film(null, "Name", "description",
-                        LocalDate.of(2000, 5, 4), 0, 4),
-                new Film(null, "Name", "description",
-                        LocalDate.of(2000, 5, 4), -120, 5)
-        );
     }
 }

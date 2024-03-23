@@ -13,8 +13,10 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.RatingMpa;
 
-import java.sql.*;
 import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 
 @Slf4j
@@ -26,6 +28,29 @@ public class FilmDbStorage implements FilmStorage {
     @Autowired
     public FilmDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+    }
+
+    private static Integer makeLike(ResultSet resultSet, int rowNum) throws SQLException {
+        return resultSet.getInt("user_id");
+    }
+
+    private static Genre makeGenre(ResultSet resultSet, int rowNum) throws SQLException {
+        switch (resultSet.getInt("genre_id")) {
+            case 1:
+                return Genre.COMEDY;
+            case 2:
+                return Genre.DRAMA;
+            case 3:
+                return Genre.CARTOON;
+            case 4:
+                return Genre.THRILLER;
+            case 5:
+                return Genre.DOCUMENTARY;
+            case 6:
+                return Genre.ACTION;
+            default:
+                throw new ObjectNotFoundException("Запрошен рейтинг с несуществующим id.");
+        }
     }
 
     @Override
@@ -68,8 +93,8 @@ public class FilmDbStorage implements FilmStorage {
         };
         jdbcTemplate.update(connection, keyHolder);
         log.info("Был добавлен фильм с названием {} {} датой выпуска.", film.getName(), film.getReleaseDate());
-        film.setId(keyHolder.getKey().intValue());
-        if (film.getGenres() != null && film.getGenres().size() != 0) {
+        film.setId(Objects.requireNonNull(keyHolder.getKey()).intValue());
+        if (film.getGenres() != null && !film.getGenres().isEmpty()) {
             createFilmGenres(film.getGenres(), film.getId());
         }
         return film;
@@ -93,7 +118,7 @@ public class FilmDbStorage implements FilmStorage {
             } catch (Exception e) {
                 log.error("Произошла ошибка во время удаления записей жанров фильма с id = {}", film.getId());
             }
-            if (film.getGenres().size() != 0) {
+            if (!film.getGenres().isEmpty()) {
                 createFilmGenres(film.getGenres(), film.getId());
             }
         }
@@ -142,9 +167,9 @@ public class FilmDbStorage implements FilmStorage {
 
     private Film makeFilm(ResultSet resultSet, int rowNum) throws SQLException {
         Film film = Film.builder().id(resultSet.getInt("id")).name(resultSet.getString("name"))
-            .description(resultSet.getString("description"))
-            .releaseDate(resultSet.getDate("release_date").toLocalDate())
-            .duration(resultSet.getInt("duration")).build();
+                .description(resultSet.getString("description"))
+                .releaseDate(resultSet.getDate("release_date").toLocalDate())
+                .duration(resultSet.getInt("duration")).build();
 
         switch (resultSet.getInt("rating_id")) {
             case 1:
@@ -185,29 +210,6 @@ public class FilmDbStorage implements FilmStorage {
             log.error("Ошибка во время попытки добавления лайков к фильму с id = {}.", film.getId());
         }
         film.setLikes(new HashSet<>(likes));
-    }
-
-    private static Integer makeLike(ResultSet resultSet, int rowNum) throws SQLException {
-        return resultSet.getInt("user_id");
-    }
-
-    private static Genre makeGenre(ResultSet resultSet, int rowNum) throws SQLException {
-        switch (resultSet.getInt("genre_id")) {
-            case 1:
-                return Genre.COMEDY;
-            case 2:
-                return Genre.DRAMA;
-            case 3:
-                return Genre.CARTOON;
-            case 4:
-                return Genre.THRILLER;
-            case 5:
-                return Genre.DOCUMENTARY;
-            case 6:
-                return Genre.ACTION;
-            default:
-                throw new ObjectNotFoundException("Запрошен рейтинг с несуществующим id.");
-        }
     }
 
     private Film gettingFilmById(int id) {
